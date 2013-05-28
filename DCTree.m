@@ -61,26 +61,22 @@
     NSComparisonResult comparisonResult;
     if (self.comparator) {
         comparisonResult = self.comparator(object, treeNode.object);
-        
-        if (comparisonResult == NSOrderedSame) {
-            searchTreeNode = treeNode;
-        } else {
-            for (DCTreeNode *leafNode in treeNode.leafs) {
-                searchTreeNode = [self searchDepthFirst:object treeNode:leafNode];
-                if (searchTreeNode) {
-                    break;
-                }
-            }
-        }
-        
-        return searchTreeNode;
+    } else {
+        comparisonResult = [object compare:treeNode.object];
+    }
+    
+    if (comparisonResult == NSOrderedSame) {
+        searchTreeNode = treeNode;
     } else {
         for (DCTreeNode *leafNode in treeNode.leafs) {
-            comparisonResult = [object compare:leafNode.object];
+            searchTreeNode = [self searchDepthFirst:object treeNode:leafNode];
+            if (searchTreeNode) {
+                break;
+            }
         }
     }
     
-    return nil;
+    return searchTreeNode;
 }
 
 - (DCTreeNode *)searchBreadthFirst:(id)object {
