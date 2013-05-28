@@ -35,6 +35,12 @@
     return self;
 }
 
+- (void)dealloc {
+    while (!_empty) {
+        [self pop];
+    }
+}
+
 - (void)push:(id)object {
     if (!object) {
         return;

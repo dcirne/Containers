@@ -35,6 +35,12 @@
     return self;
 }
 
+- (void)dealloc {
+    while (!_empty) {
+        [self dequeue];
+    }
+}
+
 - (void)enqueue:(id)object {
     if (!object) {
         return;

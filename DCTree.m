@@ -8,10 +8,12 @@
 
 #import "DCTree.h"
 #import "DCTreeNode.h"
+#import "DCQueue.h"
 #import <dispatch/dispatch.h>
 
 @interface DCTree() {
     dispatch_queue_t queue;
+    DCQueue *bfsQueue;
 }
 
 @end
@@ -57,7 +59,7 @@
         return nil;
     }
     
-    DCTreeNode *searchTreeNode = nil;
+    DCTreeNode *resultTreeNode = nil;
     NSComparisonResult comparisonResult;
     if (self.comparator) {
         comparisonResult = self.comparator(object, treeNode.object);
@@ -66,21 +68,44 @@
     }
     
     if (comparisonResult == NSOrderedSame) {
-        searchTreeNode = treeNode;
+        resultTreeNode = treeNode;
     } else {
         for (DCTreeNode *leafNode in treeNode.leafs) {
-            searchTreeNode = [self searchDepthFirst:object treeNode:leafNode];
-            if (searchTreeNode) {
+            resultTreeNode = [self searchDepthFirst:object treeNode:leafNode];
+            if (resultTreeNode) {
                 break;
             }
         }
     }
     
-    return searchTreeNode;
+    return resultTreeNode;
 }
 
-- (DCTreeNode *)searchBreadthFirst:(id)object {
-    return nil;
+- (DCTreeNode *)searchBreadthFirst:(id)object treeNode:(DCTreeNode *)treeNode {
+    [bfsQueue enqueue:treeNode];
+    
+    DCTreeNode *resultTreeNode = nil, *searchTreeNode = nil;
+    NSComparisonResult comparisonResult;
+    while (!bfsQueue.empty) {
+        searchTreeNode = [bfsQueue dequeue];
+        
+        if (self.comparator) {
+            comparisonResult = self.comparator(object, searchTreeNode.object);
+        } else {
+            comparisonResult = [object compare:searchTreeNode.object];
+        }
+        
+        if (comparisonResult == NSOrderedSame) {
+            resultTreeNode = searchTreeNode;
+            break;
+        } else {
+            for (DCTreeNode *leafNode in searchTreeNode.leafs) {
+                [bfsQueue enqueue:leafNode];
+            }
+        }
+    }
+    
+    return resultTreeNode;
 }
 
 #pragma mark Public methods
@@ -133,8 +158,11 @@
                 treeNode = [self searchDepthFirst:object treeNode:_rootNode];
                 break;
                 
-            case SearchModeBreadthFirst:
-                treeNode = [self searchBreadthFirst:object];
+            case SearchModeBreadthFirst: {
+                bfsQueue = [[DCQueue alloc] init];
+                treeNode = [self searchBreadthFirst:object treeNode:_rootNode];
+                bfsQueue = nil;
+            }
                 break;
         }
     });
