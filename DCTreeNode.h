@@ -10,9 +10,11 @@
 
 @interface DCTreeNode : NSObject
 
-@property (nonatomic, strong) NSMutableSet *leafs;
+@property (nonatomic, strong) NSMutableSet *children;
+@property (nonatomic, weak) DCTreeNode *parent;
 @property (nonatomic, strong) id object;
 
 - (id)initWithObject:(id)object;
+- (id)initWithObject:(id)object parent:(DCTreeNode *)parent;
 
 @end

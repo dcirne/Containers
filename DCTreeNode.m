@@ -11,13 +11,18 @@
 @implementation DCTreeNode
 
 - (id)initWithObject:(id)object {
+    return [self initWithObject:object parent:nil];
+}
+
+- (id)initWithObject:(id)object parent:(DCTreeNode *)parent {
     self = [super init];
     if (!self) {
         return nil;
     }
     
     _object = object;
-    _leafs = [[NSMutableSet alloc] initWithCapacity:1];
+    _children = [[NSMutableSet alloc] initWithCapacity:1];
+    _parent = parent;
     
     return self;
 }

@@ -42,8 +42,8 @@
 
     BOOL removeRootNode = [treeNode isEqual:_rootNode];
 
-    for (DCTreeNode *leafNode in treeNode.leafs) {
-        [self removeTreeNode:leafNode];
+    for (DCTreeNode *childNode in treeNode.children) {
+        [self removeTreeNode:childNode];
     }
     
     if (removeRootNode) {
@@ -70,8 +70,8 @@
     if (comparisonResult == NSOrderedSame) {
         resultTreeNode = treeNode;
     } else {
-        for (DCTreeNode *leafNode in treeNode.leafs) {
-            resultTreeNode = [self searchDepthFirst:object treeNode:leafNode];
+        for (DCTreeNode *childNode in treeNode.children) {
+            resultTreeNode = [self searchDepthFirst:object treeNode:childNode];
             if (resultTreeNode) {
                 break;
             }
@@ -99,8 +99,8 @@
             resultTreeNode = searchTreeNode;
             break;
         } else {
-            for (DCTreeNode *leafNode in searchTreeNode.leafs) {
-                [bfsQueue enqueue:leafNode];
+            for (DCTreeNode *childNode in searchTreeNode.children) {
+                [bfsQueue enqueue:childNode];
             }
         }
     }
@@ -122,7 +122,7 @@
         
         DCTreeNode *insertionNode = treeNode ? : _rootNode;
         DCTreeNode *newNode = [[DCTreeNode alloc] initWithObject:object];
-        [insertionNode.leafs addObject:newNode];
+        [insertionNode.children addObject:newNode];
     });
 }
 
