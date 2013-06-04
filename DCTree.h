@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @class DCTreeNode;
+@class DCStack;
 
 typedef enum SearchMode : NSUInteger {
     SearchModeDepthFirst = 0,
@@ -24,5 +25,6 @@ typedef enum SearchMode : NSUInteger {
 - (void)remove:(DCTreeNode *)treeNode;
 - (void)removeAllNodes;
 - (DCTreeNode *)search:(id)object mode:(SearchMode)searchMode;
+- (DCStack *)pathFrom:(DCTreeNode *)startNode to:(DCTreeNode *)endNode mode:(SearchMode)searchMode;
 
 @end

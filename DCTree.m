@@ -10,10 +10,10 @@
 #import "DCTreeNode.h"
 #import "DCQueue.h"
 #import <dispatch/dispatch.h>
+#import "DCStack.h"
 
 @interface DCTree() {
     dispatch_queue_t queue;
-    DCQueue *bfsQueue;
 }
 
 @end
@@ -82,6 +82,7 @@
 }
 
 - (DCTreeNode *)searchBreadthFirst:(id)object treeNode:(DCTreeNode *)treeNode {
+    DCQueue *bfsQueue = [[DCQueue alloc] init];
     [bfsQueue enqueue:treeNode];
     
     DCTreeNode *resultTreeNode = nil, *searchTreeNode = nil;
@@ -106,6 +107,25 @@
     }
     
     return resultTreeNode;
+}
+
+- (BOOL)pathDepthFirstFrom:(DCTreeNode *)startNode to:(DCTreeNode *)endNode pathStack:(DCStack *)pathStack {
+    BOOL endNodeFound = [startNode isEqual:endNode];
+    
+    if (!endNodeFound) {
+        for (DCTreeNode *childNode in startNode.children) {
+            [pathStack push:childNode];
+            endNodeFound = [self pathDepthFirstFrom:childNode to:endNode pathStack:pathStack];
+            
+            if (endNodeFound) {
+                break;
+            } else {
+                [pathStack pop];
+            }
+        }
+    }
+    
+    return endNodeFound;
 }
 
 #pragma mark Public methods
@@ -158,16 +178,41 @@
                 treeNode = [self searchDepthFirst:object treeNode:_rootNode];
                 break;
                 
-            case SearchModeBreadthFirst: {
-                bfsQueue = [[DCQueue alloc] init];
+            case SearchModeBreadthFirst:
                 treeNode = [self searchBreadthFirst:object treeNode:_rootNode];
-                bfsQueue = nil;
-            }
                 break;
         }
     });
     
     return treeNode;
+}
+
+- (DCStack *)pathFrom:(DCTreeNode *)startNode to:(DCTreeNode *)endNode mode:(SearchMode)searchMode {
+    if (!startNode || !endNode) {
+        return nil;
+    }
+    
+    __block DCStack *resultStack = nil;
+    __block DCStack *pathStack = [[DCStack alloc] init];
+    dispatch_sync(queue, ^{
+        switch (searchMode) {
+            case SearchModeDepthFirst:
+                [pathStack push:startNode];
+                if ([self pathDepthFirstFrom:startNode to:endNode pathStack:pathStack]) {
+                    resultStack = [[DCStack alloc] init];
+                    while (!pathStack.empty) {
+                        DCTreeNode *treeNode = [pathStack pop];
+                        [resultStack push:treeNode];
+                    }
+                }
+                break;
+                
+            case SearchModeBreadthFirst:
+                break;
+        }
+    });
+    
+    return resultStack;
 }
 
 @end
