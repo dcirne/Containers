@@ -59,54 +59,43 @@
         return nil;
     }
     
-    DCTreeNode *resultTreeNode = nil;
-    NSComparisonResult comparisonResult;
-    if (self.comparator) {
-        comparisonResult = self.comparator(object, treeNode.object);
-    } else {
-        comparisonResult = [object compare:treeNode.object];
-    }
-    
+    DCTreeNode *resultNode = nil;
+    NSComparisonResult comparisonResult = self.comparator ? self.comparator(object, treeNode.object) : [object compare:treeNode.object];
     if (comparisonResult == NSOrderedSame) {
-        resultTreeNode = treeNode;
+        resultNode = treeNode;
     } else {
         for (DCTreeNode *childNode in treeNode.children) {
-            resultTreeNode = [self searchDepthFirst:object treeNode:childNode];
-            if (resultTreeNode) {
+            resultNode = [self searchDepthFirst:object treeNode:childNode];
+            if (resultNode) {
                 break;
             }
         }
     }
     
-    return resultTreeNode;
+    return resultNode;
 }
 
 - (DCTreeNode *)searchBreadthFirst:(id)object treeNode:(DCTreeNode *)treeNode {
     DCQueue *bfsQueue = [[DCQueue alloc] init];
     [bfsQueue enqueue:treeNode];
     
-    DCTreeNode *resultTreeNode = nil, *searchTreeNode = nil;
+    DCTreeNode *resultNode = nil, *searchNode = nil;
     NSComparisonResult comparisonResult;
     while (!bfsQueue.empty) {
-        searchTreeNode = [bfsQueue dequeue];
+        searchNode = [bfsQueue dequeue];
         
-        if (self.comparator) {
-            comparisonResult = self.comparator(object, searchTreeNode.object);
-        } else {
-            comparisonResult = [object compare:searchTreeNode.object];
-        }
-        
+        comparisonResult = self.comparator ? self.comparator(object, searchNode.object) : [object compare:searchNode.object];
         if (comparisonResult == NSOrderedSame) {
-            resultTreeNode = searchTreeNode;
+            resultNode = searchNode;
             break;
         } else {
-            for (DCTreeNode *childNode in searchTreeNode.children) {
+            for (DCTreeNode *childNode in searchNode.children) {
                 [bfsQueue enqueue:childNode];
             }
         }
     }
     
-    return resultTreeNode;
+    return resultNode;
 }
 
 - (BOOL)pathDepthFirstFrom:(DCTreeNode *)startNode to:(DCTreeNode *)endNode pathStack:(DCStack *)pathStack {

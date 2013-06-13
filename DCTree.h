@@ -7,14 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "DCContainerConstants.h"
 
 @class DCTreeNode;
 @class DCStack;
-
-typedef enum SearchMode : NSUInteger {
-    SearchModeDepthFirst = 0,
-    SearchModeBreadthFirst
-} SearchMode;
 
 @interface DCTree : NSObject
 
