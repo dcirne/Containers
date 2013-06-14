@@ -81,6 +81,9 @@
         
         if (bfsQueue.empty) {
             rightmostLeafNode = searchNode;
+        } else {
+            [bfsQueue enqueue:searchNode.left];
+            [bfsQueue enqueue:searchNode.right];
         }
     }
     
@@ -124,6 +127,9 @@
         if (comparisonResult == NSOrderedSame) {
             resultNode = searchNode;
             break;
+        } else {
+            [bfsQueue enqueue:searchNode.left];
+            [bfsQueue enqueue:searchNode.right];
         }
     }
 
@@ -150,10 +156,12 @@
 }
 
 - (void)swapParentChildNodes:(DCHeapNode *)childNode {
-    DCHeapNode *parentNode = childNode.parent;
-    DCHeapNode *grandParentNode = childNode.parent.parent;
-    DCHeapNode *leftNode = childNode.left;
-    DCHeapNode *rightNode = childNode.right;
+    DCHeapNode *const parentNode = childNode.parent;
+    DCHeapNode *const parentLeftNode = childNode.parent.left;
+    DCHeapNode *const parentRightNode = childNode.parent.right;
+    DCHeapNode *const grandParentNode = childNode.parent.parent;
+    DCHeapNode *const childLeftNode = childNode.left;
+    DCHeapNode *const childRightNode = childNode.right;
     
     if (grandParentNode.left == parentNode) {
         grandParentNode.left = childNode;
@@ -161,22 +169,28 @@
         grandParentNode.right = childNode;
     }
     
-    if (parentNode.left == childNode) {
-        childNode.right = parentNode.right;
+    DCHeapNode *comparisonNode;
+    if (childNode == parentLeftNode) {
+        childNode.right = parentRightNode;
         childNode.left = parentNode;
+        parentRightNode.parent = childNode;
+        comparisonNode = parentRightNode;
     } else {
-        childNode.left = parentNode.left;
+        childNode.left = parentLeftNode;
         childNode.right = parentNode;
+        parentLeftNode.parent = childNode;
+        comparisonNode = parentLeftNode;
     }
     
-    parentNode.left = leftNode;
-    leftNode.parent = parentNode;
-    parentNode.right = rightNode;
-    rightNode.parent = parentNode;
+    parentNode.left = childLeftNode;
+    parentNode.right = childRightNode;
+    parentNode.parent = childNode;
+    childLeftNode.parent = parentNode;
+    childRightNode.parent = parentNode;
     
-    NSComparisonResult comparisonResult = self.comparator ? self.comparator(childNode.object, grandParentNode.object) : [childNode.object compare:grandParentNode.object];
-    if (comparisonResult != NSOrderedSame) {
-        [self swapParentChildNodes:childNode];
+    NSComparisonResult comparisonResult = self.comparator ? self.comparator(childNode.object, comparisonNode.object) : [childNode.object compare:comparisonNode.object];
+    if (comparisonResult == NSOrderedAscending) {
+        [self swapParentChildNodes:comparisonNode];
     }
 }
 
